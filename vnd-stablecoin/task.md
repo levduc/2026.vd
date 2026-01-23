@@ -1,0 +1,26 @@
+# Tasks
+
+- [x] Phase 1: Core Contracts <!-- id: 0 -->
+    - [x] Initialize project (Hardhat, OpenZeppelin) <!-- id: 1 -->
+    - [x] Implement VndStablecoin.sol (ERC-20 + Pausable + Ownable + Blacklist) <!-- id: 2 -->
+    - [x] Implement VndOracle.sol (Manual Oracle) <!-- id: 3 -->
+    - [x] Basic tests for Core Contracts <!-- id: 4 -->
+    - [x] Deploy to Base testnet (Local Verified) <!-- id: 5 -->
+- [x] Phase 1.5: Security & Robustness (Hardening) <!-- id: 20 -->
+    - [x] Test Rounding Errors (Oracle math with small/irregular numbers) <!-- id: 21 -->
+    - [x] Test Access Control edges (Renounce ownership, etc.) <!-- id: 22 -->
+    - [x] Test Zero/Max values <!-- id: 23 -->
+- [ ] Phase 2: Uniswap Liquidity <!-- id: 6 -->
+    - [ ] Create `scripts/add_liquidity.js` (Interact with Uniswap V2 Router) <!-- id: 7 -->
+    - [ ] Create `scripts/swap.js` (Test swap functionality) <!-- id: 8 -->
+    - [ ] Fork Mainnet test for liquidity provision <!-- id: 9 -->
+- [ ] Phase 3: Admin Frontend <!-- id: 10 -->
+    - [ ] Initialize React app <!-- id: 11 -->
+    - [ ] Implement Wallet Connect <!-- id: 12 -->
+    - [ ] Implement Dashboard (Supply, Reserves) <!-- id: 13 -->
+    - [ ] Implement Mint/Burn UI <!-- id: 14 -->
+    - [ ] Implement Oracle Update UI <!-- id: 15 -->
+- [ ] Phase 4: Mainnet Pilot <!-- id: 16 -->
+    - [ ] Deploy to Base mainnet <!-- id: 17 -->
+    - [ ] Seed liquidity <!-- id: 18 -->
+    - [ ] Document process <!-- id: 19 -->
