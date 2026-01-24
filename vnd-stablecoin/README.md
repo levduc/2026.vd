@@ -60,3 +60,39 @@ To deploy contracts to a local Hardhat network:
 ## Features (Phase 1)
 -   **Stablecoin**: ERC-20 `vnd` symbol, Mint/Burn (Owner only), Pausable, Blacklist.
 -   **Oracle**: Manual rate updates (Owner only).
+
+## Admin Tasks
+
+We provide Hardhat tasks for easy command-line interaction with the contracts.
+
+### Minting
+```bash
+npx hardhat mint --contract <STABLECOIN_ADDRESS> --to <RECIPIENT> --amount <AMOUNT> --network <NETWORK>
+```
+
+### Burning
+```bash
+npx hardhat burn --contract <STABLECOIN_ADDRESS> --from <TARGET> --amount <AMOUNT> --network <NETWORK>
+```
+
+### Blacklist Management
+```bash
+npx hardhat blacklist --contract <STABLECOIN_ADDRESS> --account <TARGET> --network <NETWORK>
+npx hardhat unblacklist --contract <STABLECOIN_ADDRESS> --account <TARGET> --network <NETWORK>
+```
+
+### Update Exchange Rate
+```bash
+npx hardhat update-rate --contract <ORACLE_ADDRESS> --rate <NEW_RATE> --network <NETWORK>
+```
+*Note: Rate is VND per 1 USD (e.g., 25000).*
+
+### Transfer Ownership
+```bash
+npx hardhat transfer-ownership --contract <CONTRACT_ADDRESS> --new-owner <NEW_OWNER> --network <NETWORK>
+```
+
+### Check Balance
+```bash
+npx hardhat balance --contract <STABLECOIN_ADDRESS> --account <TARGET> --network <NETWORK>
+```
