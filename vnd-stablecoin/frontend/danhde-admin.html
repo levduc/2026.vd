@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đánh Đề Admin - VND Stablecoin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="danhde.css">
+    <style>
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .admin-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .admin-card h3 {
+            font-family: var(--font-heading);
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .info-item .value {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            color: var(--text-main);
+        }
+
+        .admin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .btn-danger {
+            background: #DA251D;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #b51f18;
+        }
+
+        .btn-success {
+            background: #00CC66;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #00b359;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+        }
+
+        .liquidity-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .liquidity-table th,
+        .liquidity-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .liquidity-table th {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+
+        .logs {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .log-entry.success {
+            color: #00CC66;
+        }
+
+        .log-entry.error {
+            color: #FF6B6B;
+        }
+
+        .log-entry.info {
+            color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="glow-bg"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="container nav-container">
+            <div class="logo">
+                <span class="logo-icon">⚙️</span>
+                <span>Đánh Đề Admin</span>
+            </div>
+            <nav>
+                <a href="index.html">Exchange</a>
+                <a href="danhde.html">Đánh Đề</a>
+                <a href="danhde-admin.html" class="active">Admin</a>
+            </nav>
+            <button class="btn btn-primary" id="connectBtn">Connect Wallet</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top: 120px;">
+        <h1 style="margin-bottom: 40px;">Game Administration</h1>
+
+        <div class="admin-grid">
+            <!-- Round Management -->
+            <div class="admin-card">
+                <h3>🎰 Round Management</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Current Round</label>
+                        <div class="value" id="adminRoundId">--</div>
+                    </div>
+                    <div class="info-item">
+                        <label>Status</label>
+                        <div class="value" id="adminRoundStatus">--</div>
+                    </div>
+                    <div class="info-item">
+                        <label>End Time</label>
+                        <div class="value" id="adminEndTime">--</div>
+                    </div>
+                    <div class="info-item">
+                        <label>Total Bets</label>
+                        <div class="value" id="adminTotalBets">--</div>
+                    </div>
+                </div>
+
+                <div class="admin-form">
+                    <div class="form-group">
+                        <label>Set Winning Number (0-99)</label>
+                        <input type="number" id="winningNumber" min="0" max="99" class="input-field" placeholder="Enter winning number">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-success" id="setResultBtn">Set Result</button>
+                        <button class="btn btn-danger" id="cancelRoundBtn">Cancel Round</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Oracle Management -->
+            <div class="admin-card">
+                <h3>📡 Oracle Management</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Latest Result</label>
+                        <div class="value" id="oracleLatestNumber">--</div>
+                    </div>
+                    <div class="info-item">
+                        <label>Draw ID</label>
+                        <div class="value" id="oracleDrawId">--</div>
+                    </div>
+                </div>
+
+                <div class="admin-form">
+                    <div class="form-group">
+                        <label>Draw ID (e.g., 20240131-MB)</label>
+                        <input type="text" id="oracleDrawIdInput" class="input-field" placeholder="YYYYMMDD-REGION">
+                    </div>
+                    <div class="form-group">
+                        <label>Full Lottery Number</label>
+                        <input type="number" id="oracleFullNumber" class="input-field" placeholder="e.g., 12345">
+                    </div>
+                    <button class="btn btn-primary" id="submitOracleBtn">Submit to Oracle</button>
+                </div>
+            </div>
+
+            <!-- Game Configuration -->
+            <div class="admin-card">
+                <h3>⚙️ Game Configuration</h3>
+                <div class="admin-form">
+                    <div class="form-group">
+                        <label>Payout Multiplier (Current: <span id="currentMultiplier">80</span>x)</label>
+                        <input type="number" id="newMultiplier" min="1" max="99" class="input-field" placeholder="e.g., 80">
+                    </div>
+                    <div class="form-group">
+                        <label>Min Bet (VND) - Current: <span id="currentMinBet">10,000</span></label>
+                        <input type="number" id="newMinBet" class="input-field" placeholder="e.g., 10000">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Bet (VND) - Current: <span id="currentMaxBet">10,000,000</span></label>
+                        <input type="number" id="newMaxBet" class="input-field" placeholder="e.g., 10000000">
+                    </div>
+                    <div class="form-group">
+                        <label>Round Duration (hours) - Current: <span id="currentDuration">24</span></label>
+                        <input type="number" id="newDuration" class="input-field" placeholder="e.g., 24">
+                    </div>
+                    <button class="btn btn-primary" id="updateConfigBtn">Update Configuration</button>
+                </div>
+            </div>
+
+            <!-- Token Configuration -->
+            <div class="admin-card">
+                <h3>🪙 Token Configuration</h3>
+                <div class="admin-form">
+                    <div class="form-group">
+                        <label>Token Address</label>
+                        <input type="text" id="tokenAddress" class="input-field" placeholder="0x...">
+                    </div>
+                    <div class="form-group">
+                        <label>VND Rate (1 token = X VND)</label>
+                        <input type="number" id="tokenRate" class="input-field" placeholder="e.g., 25000 for USDC">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-success" id="addTokenBtn">Add Token</button>
+                        <button class="btn btn-danger" id="removeTokenBtn">Remove Token</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liquidity Management -->
+            <div class="admin-card" style="grid-column: span 2;">
+                <h3>💰 Liquidity Management</h3>
+                <table class="liquidity-table">
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>Balance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="liquidityTable">
+                        <tr>
+                            <td colspan="3">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="admin-form" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label>Token</label>
+                        <select id="liquidityToken" class="input-field">
+                            <option value="">Select Token</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" id="liquidityAmount" class="input-field" placeholder="Amount">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-success" id="depositBtn">Deposit</button>
+                        <button class="btn btn-danger" id="withdrawBtn">Withdraw</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="admin-card">
+            <h3>📋 Activity Log</h3>
+            <div class="logs" id="activityLog">
+                <div class="log-entry info">Waiting for wallet connection...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <script src="danhde-config.js"></script>
+    <script>
+        let provider = null;
+        let signer = null;
+        let danhDeContract = null;
+        let oracleContract = null;
+        let userAddress = null;
+
+        const connectBtn = document.getElementById('connectBtn');
+        const toastContainer = document.getElementById('toastContainer');
+        const activityLog = document.getElementById('activityLog');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupEventListeners();
+
+            if (window.ethereum) {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0) {
+                    await connectWallet();
+                }
+            }
+        });
+
+        function setupEventListeners() {
+            connectBtn.addEventListener('click', connectWallet);
+            document.getElementById('setResultBtn').addEventListener('click', setResult);
+            document.getElementById('cancelRoundBtn').addEventListener('click', cancelRound);
+            document.getElementById('submitOracleBtn').addEventListener('click', submitToOracle);
+            document.getElementById('updateConfigBtn').addEventListener('click', updateConfig);
+            document.getElementById('addTokenBtn').addEventListener('click', () => configureToken(true));
+            document.getElementById('removeTokenBtn').addEventListener('click', () => configureToken(false));
+            document.getElementById('depositBtn').addEventListener('click', depositLiquidity);
+            document.getElementById('withdrawBtn').addEventListener('click', withdrawLiquidity);
+
+            if (window.ethereum) {
+                window.ethereum.on('accountsChanged', () => window.location.reload());
+                window.ethereum.on('chainChanged', () => window.location.reload());
+            }
+        }
+
+        async function connectWallet() {
+            if (!window.ethereum) {
+                showToast('Please install MetaMask!', 'error');
+                return;
+            }
+
+            try {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                const accounts = await provider.send('eth_requestAccounts', []);
+                userAddress = accounts[0];
+                signer = provider.getSigner();
+
+                danhDeContract = new ethers.Contract(
+                    DANHDE_CONFIG.DANHDE_ADDRESS,
+                    DANHDE_CONFIG.DANHDE_ABI,
+                    signer
+                );
+
+                oracleContract = new ethers.Contract(
+                    DANHDE_CONFIG.ORACLE_ADDRESS,
+                    DANHDE_CONFIG.ORACLE_ABI,
+                    signer
+                );
+
+                connectBtn.textContent = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+                log('Wallet connected: ' + userAddress, 'success');
+
+                await loadAllData();
+
+            } catch (error) {
+                console.error(error);
+                showToast('Connection failed', 'error');
+            }
+        }
+
+        async function loadAllData() {
+            await loadRoundInfo();
+            await loadOracleInfo();
+            await loadConfig();
+            await loadLiquidity();
+        }
+
+        async function loadRoundInfo() {
+            if (!danhDeContract) return;
+
+            try {
+                const round = await danhDeContract.getCurrentRound();
+                document.getElementById('adminRoundId').textContent = '#' + round.roundId.toString();
+
+                const now = Math.floor(Date.now() / 1000);
+                let status = 'Open';
+                if (round.cancelled) status = 'Cancelled';
+                else if (round.resultTime.toNumber() > 0) status = 'Finished';
+                else if (now >= round.endTime.toNumber()) status = 'Pending Result';
+
+                document.getElementById('adminRoundStatus').textContent = status;
+                document.getElementById('adminEndTime').textContent = formatDate(round.endTime.toNumber());
+                document.getElementById('adminTotalBets').textContent = formatVND(round.totalBetsVND);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function loadOracleInfo() {
+            if (!oracleContract) return;
+
+            try {
+                const result = await oracleContract.getLatestResult();
+                document.getElementById('oracleLatestNumber').textContent = result.lastTwoDigits.toString().padStart(2, '0');
+                document.getElementById('oracleDrawId').textContent = result.drawId || '--';
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function loadConfig() {
+            if (!danhDeContract) return;
+
+            try {
+                const multiplier = await danhDeContract.payoutMultiplier();
+                const minBet = await danhDeContract.minBetVND();
+                const maxBet = await danhDeContract.maxBetVND();
+
+                document.getElementById('currentMultiplier').textContent = multiplier.toString();
+                document.getElementById('currentMinBet').textContent = ethers.utils.formatUnits(minBet, 18);
+                document.getElementById('currentMaxBet').textContent = ethers.utils.formatUnits(maxBet, 18);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function loadLiquidity() {
+            if (!danhDeContract) return;
+
+            const tbody = document.getElementById('liquidityTable');
+            const tokenSelect = document.getElementById('liquidityToken');
+            tbody.innerHTML = '';
+            tokenSelect.innerHTML = '<option value="">Select Token</option>';
+
+            for (const [key, token] of Object.entries(DANHDE_CONFIG.TOKENS)) {
+                if (token.address === '0x0000000000000000000000000000000000000000') continue;
+
+                try {
+                    const balance = await danhDeContract.getBalance(token.address);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${token.symbol}</td>
+                        <td>${formatToken(balance, token.decimals, token.symbol)}</td>
+                        <td><button class="btn btn-outline" onclick="quickWithdraw('${token.address}')">Withdraw All</button></td>
+                    `;
+                    tbody.appendChild(tr);
+
+                    const option = document.createElement('option');
+                    option.value = token.address;
+                    option.textContent = token.symbol;
+                    tokenSelect.appendChild(option);
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        }
+
+        async function setResult() {
+            const number = parseInt(document.getElementById('winningNumber').value);
+            if (isNaN(number) || number < 0 || number > 99) {
+                showToast('Enter valid number (0-99)', 'error');
+                return;
+            }
+
+            try {
+                log('Setting result: ' + number, 'info');
+                const tx = await danhDeContract.setResult(number);
+                await tx.wait();
+                showToast('Result set successfully!', 'success');
+                log('Result set: ' + number, 'success');
+                await loadRoundInfo();
+            } catch (error) {
+                showToast(error.reason || 'Transaction failed', 'error');
+                log('Failed: ' + error.message, 'error');
+            }
+        }
+
+        async function cancelRound() {
+            if (!confirm('Are you sure you want to cancel the current round?')) return;
+
+            try {
+                log('Cancelling round...', 'info');
+                const tx = await danhDeContract.cancelRound();
+                await tx.wait();
+                showToast('Round cancelled', 'success');
+                log('Round cancelled', 'success');
+                await loadRoundInfo();
+            } catch (error) {
+                showToast(error.reason || 'Transaction failed', 'error');
+                log('Failed: ' + error.message, 'error');
+            }
+        }
+
+        async function submitToOracle() {
+            const drawId = document.getElementById('oracleDrawIdInput').value;
+            const fullNumber = parseInt(document.getElementById('oracleFullNumber').value);
+
+            if (!drawId || isNaN(fullNumber)) {
+                showToast('Fill all fields', 'error');
+                return;
+            }
+
+            try {
+                log('Submitting to oracle: ' + drawId + ' = ' + fullNumber, 'info');
+                const tx = await oracleContract.submitResult(drawId, fullNumber);
+                await tx.wait();
+                showToast('Oracle updated!', 'success');
+                log('Oracle updated', 'success');
+                await loadOracleInfo();
+            } catch (error) {
+                showToast(error.reason || 'Transaction failed', 'error');
+                log('Failed: ' + error.message, 'error');
+            }
+        }
+
+        async function updateConfig() {
+            try {
+                const multiplier = document.getElementById('newMultiplier').value;
+                const minBet = document.getElementById('newMinBet').value;
+                const maxBet = document.getElementById('newMaxBet').value;
+                const duration = document.getElementById('newDuration').value;
+
+                if (multiplier) {
+                    log('Updating multiplier to ' + multiplier, 'info');
+                    const tx = await danhDeContract.setPayoutMultiplier(multiplier);
+                    await tx.wait();
+                }
+
+                if (minBet && maxBet) {
+                    log('Updating bet limits', 'info');
+                    const tx = await danhDeContract.setBetLimits(
+                        ethers.utils.parseEther(minBet),
+                        ethers.utils.parseEther(maxBet)
+                    );
+                    await tx.wait();
+                }
+
+                if (duration) {
+                    log('Updating round duration to ' + duration + ' hours', 'info');
+                    const tx = await danhDeContract.setRoundDuration(parseInt(duration) * 3600);
+                    await tx.wait();
+                }
+
+                showToast('Configuration updated!', 'success');
+                log('Configuration updated', 'success');
+                await loadConfig();
+            } catch (error) {
+                showToast(error.reason || 'Transaction failed', 'error');
+                log('Failed: ' + error.message, 'error');
+            }
+        }
+
+        async function configureToken(supported) {
+            const address = document.getElementById('tokenAddress').value;
+            const rate = document.getElementById('tokenRate').value;
+
+            if (!address) {
+                showToast('Enter token address', 'error');
+                return;
+            }
+
+            try {
+                log((supported ? 'Adding' : 'Removing') + ' token: ' + address, 'info');
+                const tx = await danhDeContract.configureToken(address, supported, supported ? rate : 0);
+                await tx.wait();
+                showToast('Token ' + (supported ? 'added' : 'removed'), 'success');
+                log('Token configured', 'success');
+                await loadLiquidity();
+            } catch (error) {
+                showToast(error.reason || 'Transaction failed', 'error');
+                log('Failed: ' + error.message, 'error');
+            }
+        }
+
+        async function depositLiquidity() {
+            const token = document.getElementById('liquidityToken').value;
+            const amount = document.getElementById('liquidityAmount').value;
+
+            if (!token || !amount) {
+                showToast('Select token and enter amount', 'error');
+                return;
+            }
+
+            try {
+                const tokenInfo = Object.values(DANHDE_CONFIG.TOKENS).find(t => t.address === token);
+                const amountWei = ethers.utils.parseUnits(amount, tokenInfo.decimals);
+
+                // Approve
+                const tokenContract = new ethers.Contract(token, DANHDE_CONFIG.ERC20_ABI, signer);
+                log('Approving...', 'info');
+                const approveTx = await tokenContract.approve(DANHDE_CONFIG.DANHDE_ADDRESS, amountWei);
+                await approveTx.wait();
+
+                // Deposit
+                log('Depositing...', 'info');
+                const tx = await danhDeContract.depositLiquidity(token, amountWei);
+                await tx.wait();
+
+                showToast('Deposit successful!', 'success');
+                log('Deposited ' + amount + ' ' + tokenInfo.symbol, 'success');
+                await loadLiquidity();
+            } catch (error) {
+                showToast(error.reason || 'Transaction failed', 'error');
+                log('Failed: ' + error.message, 'error');
+            }
+        }
+
+        async function withdrawLiquidity() {
+            const token = document.getElementById('liquidityToken').value;
+            const amount = document.getElementById('liquidityAmount').value;
+
+            if (!token || !amount) {
+                showToast('Select token and enter amount', 'error');
+                return;
+            }
+
+            try {
+                const tokenInfo = Object.values(DANHDE_CONFIG.TOKENS).find(t => t.address === token);
+                const amountWei = ethers.utils.parseUnits(amount, tokenInfo.decimals);
+
+                log('Withdrawing...', 'info');
+                const tx = await danhDeContract.withdrawLiquidity(token, amountWei);
+                await tx.wait();
+
+                showToast('Withdrawal successful!', 'success');
+                log('Withdrew ' + amount + ' ' + tokenInfo.symbol, 'success');
+                await loadLiquidity();
+            } catch (error) {
+                showToast(error.reason || 'Transaction failed', 'error');
+                log('Failed: ' + error.message, 'error');
+            }
+        }
+
+        async function quickWithdraw(tokenAddress) {
+            try {
+                log('Emergency withdraw...', 'info');
+                const tx = await danhDeContract.emergencyWithdraw(tokenAddress);
+                await tx.wait();
+                showToast('Withdrawal successful!', 'success');
+                log('Emergency withdraw complete', 'success');
+                await loadLiquidity();
+            } catch (error) {
+                showToast(error.reason || 'Transaction failed', 'error');
+                log('Failed: ' + error.message, 'error');
+            }
+        }
+
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry ' + type;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            activityLog.insertBefore(entry, activityLog.firstChild);
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        window.quickWithdraw = quickWithdraw;
+    </script>
+</body>
+
+</html>
