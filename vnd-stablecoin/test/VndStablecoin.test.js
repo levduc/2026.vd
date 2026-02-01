@@ -15,11 +15,22 @@ describe("VndStablecoin", function () {
         [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
         VndStablecoin = await ethers.getContractFactory("VndStablecoin");
         vnd = await VndStablecoin.deploy();
+        VndStablecoin = await ethers.getContractFactory("VndStablecoin");
+        vnd = await VndStablecoin.deploy();
     });
 
+    const getRoles = async () => {
+        const DEFAULT_ADMIN_ROLE = await vnd.DEFAULT_ADMIN_ROLE();
+        const MINTER_ROLE = await vnd.MINTER_ROLE();
+        const PAUSER_ROLE = await vnd.PAUSER_ROLE();
+        const BURNER_ROLE = await vnd.BURNER_ROLE();
+        return { DEFAULT_ADMIN_ROLE, MINTER_ROLE, PAUSER_ROLE, BURNER_ROLE };
+    };
+
     describe("Deployment", function () {
-        it("Should set the right owner", async function () {
-            expect(await vnd.owner()).to.equal(owner.address);
+        it("Should set the right admin", async function () {
+            const { DEFAULT_ADMIN_ROLE } = await getRoles();
+            expect(await vnd.hasRole(DEFAULT_ADMIN_ROLE, owner.address)).to.equal(true);
         });
 
         it("Should assign the total supply of tokens to the owner", async function () {
@@ -35,16 +46,18 @@ describe("VndStablecoin", function () {
             expect(await vnd.balanceOf(addr1.address)).to.equal(mintAmount);
         });
 
-        it("Should fail if non-owner tries to mint", async function () {
+        it("Should fail if non-minter tries to mint", async function () {
+            const { MINTER_ROLE } = await getRoles();
             const mintAmount = ethers.parseEther("1000");
             await expect(
                 vnd.connect(addr1).mint(addr1.address, mintAmount)
-            ).to.be.revertedWithCustomError(vnd, "OwnableUnauthorizedAccount");
+            ).to.be.revertedWithCustomError(vnd, "AccessControlUnauthorizedAccount")
+                .withArgs(addr1.address, MINTER_ROLE);
         });
     });
 
     describe("Burning", function () {
-        it("Should allow owner to burn tokens from an address", async function () {
+        it("Should allow burner to burn tokens from an address", async function () {
             const mintAmount = ethers.parseEther("1000");
             await vnd.mint(addr1.address, mintAmount);
 
@@ -56,7 +69,7 @@ describe("VndStablecoin", function () {
     });
 
     describe("Blacklist", function () {
-        it("Should allow owner to blacklist an address", async function () {
+        it("Should allow admin to blacklist an address", async function () {
             await vnd.blacklist(addr1.address);
             expect(await vnd.blacklisted(addr1.address)).to.equal(true);
         });
@@ -81,7 +94,7 @@ describe("VndStablecoin", function () {
     });
 
     describe("Pausable", function () {
-        it("Should allow owner to pause and unpause", async function () {
+        it("Should allow pauser to pause and unpause", async function () {
             await vnd.pause();
             expect(await vnd.paused()).to.equal(true);
 

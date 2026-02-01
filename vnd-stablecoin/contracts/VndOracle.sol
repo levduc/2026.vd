@@ -15,6 +15,7 @@ contract VndOracle is Ownable {
     }
 
     function updateRate(uint256 newRate) external onlyOwner {
+        require(newRate > 0, "Rate cannot be zero");
         vndPerUsd = newRate;
         lastUpdated = block.timestamp;
         emit RateUpdated(newRate, block.timestamp);

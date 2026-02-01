@@ -49,6 +49,43 @@ To deploy contracts to a local Hardhat network:
     ```
     *Note: This will output the deployed contract addresses.*
 
+### 3. VndExchange (Swap Pool)
+- Allows users to Buy VND with USDC/USDT.
+- Allows users to Sell VND for USDC/USDT.
+- Distinct Buy/Sell rates (spread) to capture profit.
+- Admin management of rates and liquidity withdrawal.
+- **Access Control**: VndStablecoin is now managed via `AccessControl` (Roles), allowing the Exchange contract to mint/burn automatically.
+
+## Quick Start
+
+### Installation
+```bash
+npm install
+```
+
+### Running Tests
+Run all tests:
+```bash
+npx hardhat test
+```
+
+Run Exchange specific tests:
+```bash
+npx hardhat test test/VndExchange.test.js
+```
+
+### Deployment
+To deploy the entire system (Stablecoin + Mocks + Exchange) locally:
+```bash
+npx hardhat run scripts/deploy_exchange.js
+```
+This script will:
+1. Deploy `VndStablecoin` (AccessControl).
+2. Deploy Mock USDC & USDT.
+3. Deploy `VndExchange` with initial rates (23,000 / 24,000).
+4. Grant Minter/Burner roles to the Exchange.
+5. Whitelist the mock tokens.
+
 ## Project Structure
 
 -   `contracts/`: Solidity smart contracts

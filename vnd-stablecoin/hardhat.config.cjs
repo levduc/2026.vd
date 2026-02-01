@@ -1,11 +1,7 @@
-import "@nomicfoundation/hardhat-toolbox";
-import dotenv from "dotenv";
-import { createRequire } from "module";
+require("@nomicfoundation/hardhat-toolbox");
+require("dotenv").config();
 
-const require = createRequire(import.meta.url);
 const { task } = require("hardhat/config");
-
-dotenv.config();
 
 task("mint", "Mints VND tokens to a specific address")
     .addParam("contract", "The address of the VndStablecoin contract")
@@ -94,7 +90,7 @@ task("balance", "Prints the VND balance of an account")
     });
 
 /** @type import('hardhat/config').HardhatUserConfig */
-export default {
+module.exports = {
     solidity: "0.8.20",
     networks: {
         baseSepolia: {

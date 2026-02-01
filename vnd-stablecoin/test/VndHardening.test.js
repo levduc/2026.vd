@@ -19,6 +19,14 @@ describe("Vnd Hardening & Security", function () {
         oracle = await VndOracle.deploy(INITIAL_RATE);
     });
 
+    // Helper to get roles
+    const getRoles = async () => {
+        const DEFAULT_ADMIN_ROLE = await vnd.DEFAULT_ADMIN_ROLE();
+        const MINTER_ROLE = await vnd.MINTER_ROLE();
+        const PAUSER_ROLE = await vnd.PAUSER_ROLE();
+        return { DEFAULT_ADMIN_ROLE, MINTER_ROLE, PAUSER_ROLE };
+    };
+
     describe("Oracle Rounding & Precision", function () {
         it("Should handle small amounts with expected truncation (VND -> USD)", async function () {
             // 1 VND is much less than 1 USD (1/25000 USD)
@@ -48,35 +56,48 @@ describe("Vnd Hardening & Security", function () {
     });
 
     describe("Access Control Integrity", function () {
-        it("Should not allow renounced owner to mint", async function () {
-            await vnd.renounceOwnership();
+        it("Should not allow revoked admin to mint", async function () {
+            const { MINTER_ROLE, DEFAULT_ADMIN_ROLE } = await getRoles();
+            // Revoke Main Admin and Minter (since owner has all initially)
+            await vnd.revokeRole(MINTER_ROLE, owner.address);
+            await vnd.revokeRole(DEFAULT_ADMIN_ROLE, owner.address); // prevents regranting
+
             await expect(
                 vnd.mint(owner.address, 100)
-            ).to.be.revertedWithCustomError(vnd, "OwnableUnauthorizedAccount");
+            ).to.be.revertedWithCustomError(vnd, "AccessControlUnauthorizedAccount")
+                .withArgs(owner.address, MINTER_ROLE);
         });
 
-        it("Should not allow renounced owner to pause", async function () {
-            await vnd.renounceOwnership();
+        it("Should not allow revoked pauser to pause", async function () {
+            const { PAUSER_ROLE, DEFAULT_ADMIN_ROLE } = await getRoles();
+            await vnd.revokeRole(PAUSER_ROLE, owner.address);
+
             await expect(
                 vnd.pause()
-            ).to.be.revertedWithCustomError(vnd, "OwnableUnauthorizedAccount");
+            ).to.be.revertedWithCustomError(vnd, "AccessControlUnauthorizedAccount")
+                .withArgs(owner.address, PAUSER_ROLE);
         });
 
-        it("Should allow new owner to mint after transfer", async function () {
-            await vnd.transferOwnership(addr1.address);
-            // Accept ownership if 2-step (OpenZeppelin Ownable is 1-step by default unless Ownable2Step used)
-            // Standard Ownable is 1-step.
+        it("Should allow new minter to mint after grant", async function () {
+            const { MINTER_ROLE } = await getRoles();
+            await vnd.grantRole(MINTER_ROLE, addr1.address);
 
             await expect(
                 vnd.connect(addr1).mint(addr1.address, 100)
             ).to.not.be.reverted;
         });
 
-        it("Should prevent old owner from minting after transfer", async function () {
-            await vnd.transferOwnership(addr1.address);
+        it("Should prevent old minter from minting after revoke", async function () {
+            const { MINTER_ROLE } = await getRoles();
+            // Grant addr1
+            await vnd.grantRole(MINTER_ROLE, addr1.address);
+            // Revoke addr1
+            await vnd.revokeRole(MINTER_ROLE, addr1.address);
+
             await expect(
-                vnd.mint(owner.address, 100)
-            ).to.be.revertedWithCustomError(vnd, "OwnableUnauthorizedAccount");
+                vnd.connect(addr1).mint(owner.address, 100)
+            ).to.be.revertedWithCustomError(vnd, "AccessControlUnauthorizedAccount")
+                .withArgs(addr1.address, MINTER_ROLE);
         });
     });
 
@@ -104,13 +125,11 @@ describe("Vnd Hardening & Security", function () {
             ).to.be.revertedWithCustomError(vnd, "ERC20InvalidSender");
         });
 
-        it("Should fail to blacklist zero address (nonsense check but good for safety)", async function () {
-            // Our logic doesn't explicitly restrict it, but it shouldn't brick anything.
-            // Let's just verify it works or check if we want to restrict it.
-            // Actually, preventing 0 address blacklist isn't strictly necessary but clean.
-            // Standard code allows it.
-            await vnd.blacklist(ethers.ZeroAddress);
-            expect(await vnd.blacklisted(ethers.ZeroAddress)).to.equal(true);
+        it("Should fail to blacklist zero address", async function () {
+            // Blacklisting zero address is prevented to avoid potential issues
+            await expect(
+                vnd.blacklist(ethers.ZeroAddress)
+            ).to.be.revertedWith("Cannot blacklist zero address");
         });
     });
 });

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | VND Stablecoin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Ethers.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
+</head>
+<body>
+    <div class="glow-bg"></div>
+
+    <header>
+        <div class="container nav-container">
+            <div class="logo">
+                <span class="logo-text">VND Access Control</span>
+            </div>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="#" class="active">Admin Dashboard</a>
+            </nav>
+            <button class="btn btn-primary" id="connect-wallet">Connect Wallet</button>
+        </div>
+    </header>
+
+    <main style="padding-top: 100px;">
+        <section class="container">
+            <h1 style="font-size: 2.5rem; margin-bottom: 20px;">Protocol Management</h1>
+            
+            <!-- Connection Status -->
+            <div id="admin-panel" style="display: none;">
+                <div class="badge" style="background: rgba(0, 204, 102, 0.15); color: #00CC66; border-color: rgba(0, 204, 102, 0.3);">
+                    Verified Admin
+                </div>
+
+                <div class="stats-grid" style="margin-top: 40px;">
+                    <!-- current Buy Rate -->
+                    <div class="stat-card">
+                        <h3>Current Buy Rate</h3>
+                        <div class="value" id="current-buy-rate">...</div>
+                        <div class="unit">VND per USD</div>
+                    </div>
+                    <!-- Current Sell Rate -->
+                    <div class="stat-card">
+                        <h3>Current Sell Rate</h3>
+                        <div class="value" id="current-sell-rate">...</div>
+                        <div class="unit">VND per USD</div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="features-grid" style="margin-top: 40px;">
+                    <!-- Update Rates Form -->
+                    <div class="feature-card">
+                        <div class="icon">📈</div>
+                        <h3>Update Daily Rates</h3>
+                        <p style="margin-bottom: 20px;">Set new market rates for Buy/Sell spread.</p>
+                        
+                        <div class="form-group">
+                            <label>Buy Rate (User Buys VND)</label>
+                            <input type="number" id="input-buy-rate" placeholder="e.g. 23000" class="input-field">
+                        </div>
+                        <div class="form-group">
+                            <label>Sell Rate (User Sells VND)</label>
+                            <input type="number" id="input-sell-rate" placeholder="e.g. 24000" class="input-field">
+                        </div>
+                        <button class="btn btn-primary" id="btn-update-rates" style="width: 100%; margin-top: 10px;">Update Rates</button>
+                    </div>
+
+                    <!-- Withdraw Liquidity Form -->
+                    <div class="feature-card">
+                        <div class="icon">🏦</div>
+                        <h3>Withdraw Treasury</h3>
+                        <p style="margin-bottom: 20px;">Pull accumulated USDC/USDT profits.</p>
+                        
+                        <div class="form-group">
+                            <label>Token Address</label>
+                            <input type="text" id="input-token-addr" placeholder="0x..." class="input-field">
+                        </div>
+                        <div class="form-group">
+                            <label>Amount (Wei/Units)</label>
+                            <input type="text" id="input-withdraw-amount" placeholder="e.g. 1000000" class="input-field">
+                        </div>
+                        <button class="btn btn-outline" id="btn-withdraw" style="width: 100%; margin-top: 10px;">Withdraw Funds</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Not Connected / Not Admin Message -->
+            <div id="auth-message" style="text-align: center; margin-top: 60px;">
+                <p class="subtitle">Please connect an Admin Wallet to access these controls.</p>
+            </div>
+
+        </section>
+    </main>
+    
+    <!-- Config and Script -->
+    <script src="config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
